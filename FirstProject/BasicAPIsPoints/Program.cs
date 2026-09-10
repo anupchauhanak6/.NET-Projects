@@ -1,13 +1,16 @@
+using BasicAPIsPoints.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// add services to the controller
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
-// routes
-app.MapGet("/", () => "Hello World!"); // get
+app.UseHttpsRedirection();
+app.UseAuthorization();
 
-app.MapPost("/post", () => "Post"); // post
+app.MapControllers();
 
-app.MapPut("/put", () => "Edit the file"); // put (edit)
-
-app.MapDelete("/delete", () => "Deleted"); // delete
 
 app.Run();

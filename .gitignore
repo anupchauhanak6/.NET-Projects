@@ -1,0 +1,6 @@
+# .NET Build outputs
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio Code settings
+.vscode/

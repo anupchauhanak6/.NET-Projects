@@ -81,7 +81,36 @@ namespace BasicAPIsPoints.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] WeatherForecast forecast)
         {
-            // Generate the next ID automatically; clients do not need to send it.
+            // Check whether the summary already exists, ignoring letter casing.
+            // Simple Step 1: Check the summery is empty or not
+            if (forecast.Summary != null && forecast.Summary.Trim() != "")
+            {
+                bool isDuplicateFound = false;
+
+                // Simple Step 2: Search through loop
+                foreach (var f in Forecasts)
+                {
+                    // Null safety + Case-insensitive match (both converted to lowercase)
+                    if (f.Summary != null && f.Summary.ToLower() == forecast.Summary.ToLower())
+                    {
+                        isDuplicateFound = true;
+                        break; // Summery mathed, break the loop
+                    }
+                }
+
+                // Simple Step 3: handle the conflict
+                if (isDuplicateFound)
+                {
+                    return Conflict(new { message = "This summary already exists." });
+                }
+            }
+            // Method 2 for the checking duplicates.
+            if (!string.IsNullOrWhiteSpace(forecast.Summary) && Forecasts.Any(f => string.Equals(f.Summary, forecast.Summary, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Conflict(new { message = "This summary already exists." });
+            }
+
+            // Generate the next ID automatically.
             forecast.Id = Forecasts.Count == 0
                 ? 1
                 : Forecasts.Max(f => f.Id) + 1;
@@ -93,7 +122,8 @@ namespace BasicAPIsPoints.Controllers
             return CreatedAtAction(
                 nameof(GetById),
                 new { id = forecast.Id },
-                forecast);
+                forecast
+            );
         }
 
         // Handles PUT /api/WeatherForecast/{id} and replaces all editable fields.

@@ -44,6 +44,7 @@ namespace BasicAPIsPoints.Controllers
             var newUser = new UserAccount
             {
                 UserId = generatedUserId,
+                Name=request.Name,
                 Username = normalizedUsername,
                 PasswordHash = hashedPassword
             };
@@ -56,6 +57,7 @@ namespace BasicAPIsPoints.Controllers
                 user = new
                 {
                     userId = newUser.UserId,
+                    name=newUser.Name,
                     username = newUser.Username
                 }
             });
@@ -81,6 +83,7 @@ namespace BasicAPIsPoints.Controllers
                 user = new
                 {
                     userId = user.UserId,
+                    Name=user.Name,
                     username = user.Username
                 }
             });
@@ -121,6 +124,19 @@ namespace BasicAPIsPoints.Controllers
                 updateMessages.Add("Username Updated Successfully.");
             }
 
+            // Ensure request.Name is provided, not empty, and actually different from existing Name
+            if (!string.IsNullOrWhiteSpace(request.Name))
+            {
+                string cleanedName = request.Name.Trim();
+
+                if (string.Equals(user.Name, cleanedName, StringComparison.Ordinal))
+                {
+                    return Conflict(new { message = "New Name cannot be the same as current Name." });
+                }
+                user.Name = cleanedName;
+                updateMessages.Add("Name has been updated successfully.");
+            }
+
             // update the password
             if (!string.IsNullOrWhiteSpace(request.Password))
             {
@@ -135,6 +151,7 @@ namespace BasicAPIsPoints.Controllers
                 user = new
                 {
                     userId = user.UserId,
+                    name=user.Name,
                     username = user.Username
                 }
             });
@@ -146,6 +163,7 @@ namespace BasicAPIsPoints.Controllers
             var users = Users.Select(user => new
             {
                 user.UserId,
+                user.Name,
                 user.Username
             }).ToList();
 
@@ -156,6 +174,7 @@ namespace BasicAPIsPoints.Controllers
     // Data Transfer Objects (DTOs)
     public class RegisterRequest
     {
+        public string Name { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
@@ -168,6 +187,7 @@ namespace BasicAPIsPoints.Controllers
 
     public class Edit
     {
+        public string Name { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
     }
@@ -175,6 +195,7 @@ namespace BasicAPIsPoints.Controllers
     public class UserAccount
     {
         public string UserId { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
     }

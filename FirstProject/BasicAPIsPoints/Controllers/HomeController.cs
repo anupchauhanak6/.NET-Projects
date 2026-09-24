@@ -169,6 +169,35 @@ namespace BasicAPIsPoints.Controllers
 
             return Ok(users);
         }
+
+        [HttpGet("user/{id}")]
+        public IActionResult GetUserById([FromRoute] string id)
+        {
+            // Validate route parameter
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest(new { message = "User ID is required." });
+            }
+
+            // Query database asynchronously using FirstOrDefaultAsync
+            var user = Users
+                .Where(u => string.Equals(u.UserId, id, StringComparison.OrdinalIgnoreCase))
+                .Select(u => new
+                {
+                    u.UserId,
+                    u.Name,
+                    u.Username
+                })
+                .FirstOrDefault(); // Non-blocking async call
+
+            // Check if user exists
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID was not found." });
+            }
+
+            return Ok(user);
+        }
     }
 
     // Data Transfer Objects (DTOs)
